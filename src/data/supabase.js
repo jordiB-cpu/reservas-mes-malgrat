@@ -80,5 +80,35 @@ export function createSupabaseBackend(url, key) {
       }
       return unwrap(await sb.from("court_players").insert({ name, phone: phone || null }).select("id").single()).id;
     },
+
+    // ---- Jugadores ----
+    async players() {
+      return unwrap(await sb.from("court_players").select("id, name, phone, notes, created_at").order("name"));
+    },
+    async savePlayer(id, patch) {
+      if (id) return unwrap(await sb.from("court_players").update(patch).eq("id", id));
+      return unwrap(await sb.from("court_players").insert(patch).select("id").single()).id;
+    },
+    async deletePlayer(id) {
+      unwrap(await sb.from("court_players").delete().eq("id", id));
+    },
+    // Reservas de un jugador: las enlazadas o, en las antiguas, por teléfono.
+    async playerBookings(player) {
+      let q = sb.from("court_bookings").select(COLS).is("cancelled_at", null).order("starts_at", { ascending: false }).limit(200);
+      q = player.phone ? q.or(`player_id.eq.${player.id},phone.eq.${player.phone}`) : q.eq("player_id", player.id);
+      return unwrap(await q);
+    },
+
+    // ---- Ajustes ----
+    async allCourts() {
+      return unwrap(await sb.from("courts").select("*").order("sort"));
+    },
+    async saveCourt(id, patch) {
+      unwrap(await sb.from("courts").update(patch).eq("id", id));
+    },
+    async saveSettings(map) {
+      const rows = Object.entries(map).map(([key, value]) => ({ key, value }));
+      unwrap(await sb.from("court_settings").upsert(rows, { onConflict: "key" }));
+    },
   };
 }

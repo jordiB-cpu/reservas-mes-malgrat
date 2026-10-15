@@ -8,6 +8,10 @@
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#0b0f0d" />
     <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Reservas" />
   </head>
   <body>
     <svg class="defs" aria-hidden="true" focusable="false">
@@ -16,6 +20,11 @@
       <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></symbol>
       <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 4.5c4.4 0 7.8 2.9 7.8 6.6s-3.4 6.6-7.8 6.6c-1 0-2-.1-2.9-.4L5 19.5l1.1-3.6C4.9 14.7 4.2 13 4.2 11.1 4.2 7.4 7.6 4.5 12 4.5z" /></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="i-day" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" /><path d="M8 3v4M16 3v4M4 10h16M12 13v4" /></symbol>
+      <symbol id="i-week" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" /><path d="M8 3v4M16 3v4M4 10h16M8 14h1M11.5 14h1M15 14h1M8 17h1M11.5 17h1" /></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2" /><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M15.5 5.6a3.2 3.2 0 0 1 0 6M17 14.2c2 .5 3.1 2.1 3.5 4.8" /></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M12 3v2.2M12 18.8V21M4.2 7.5l1.9 1.1M17.9 15.4l1.9 1.1M4.2 16.5l1.9-1.1M17.9 8.6l1.9-1.1" /><circle cx="12" cy="12" r="7" /></symbol>
       <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 1 12-4.9L19 8M19 4v4h-4M19 13a7 7 0 0 1-12 4.9L5 16M5 20v-4h4" /></symbol>
     </svg>
     <header class="appbar">
@@ -23,6 +32,7 @@
         <img src="/logo.webp" alt="" width="32" height="32" />
         <span><span translate="no">Mes Malgrat</span> <span class="brand-sub">Reservas</span></span>
       </a>
+      <nav class="tabs" id="tabs" aria-label="Secciones"></nav>
       <div class="userbox" id="userBox"></div>
     </header>
     <div class="demo-banner" id="demoBanner" hidden>Modo demo: reservas de ejemplo, guardadas solo en este navegador.</div>

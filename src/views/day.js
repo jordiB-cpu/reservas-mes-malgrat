@@ -157,7 +157,7 @@ export async function renderDay(view, app, key) {
     view.dataset.dir = dir;
     location.hash = `#/dia/${addDays(key, dir)}`;
   }
-  view.addEventListener("click", (e) => {
+  $(".day", view).addEventListener("click", (e) => {
     const a = e.target.closest("[data-dir]");
     if (a) view.dataset.dir = a.dataset.dir;
   });

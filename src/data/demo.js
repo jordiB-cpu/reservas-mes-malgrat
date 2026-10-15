@@ -59,10 +59,25 @@ export function createDemoBackend() {
     async resetPassword() {},
 
     async loadConfig() {
-      return wait({
-        courts: [1, 2, 3].map((id) => ({ id, name: `Pista ${id}`, sort: id, active: true })),
-        settings: { open: "07:00", close: "22:30", slot_minutes: 30, club_name: "Padel Mes Malgrat", durations: { partido: 90, clase: 60, escuela: 60, snp: 90, americana: 120, torneo: 120, mantenimiento: 60 } },
-      });
+      const s = config();
+      return wait({ courts: s.courts.filter((c) => c.active).sort((a, b) => a.sort - b.sort), settings: s.settings });
+    },
+    async allCourts() {
+      return wait(config().courts.sort((a, b) => a.sort - b.sort));
+    },
+    async saveCourt(id, patch) {
+      const s = load();
+      config(s);
+      Object.assign(s.courts.find((c) => c.id === id), patch);
+      save(s);
+      return wait();
+    },
+    async saveSettings(map) {
+      const s = load();
+      config(s);
+      Object.assign(s.settings, map);
+      save(s);
+      return wait();
     },
     async bookings(fromIso, toIso) {
       const s = load();
@@ -126,5 +141,36 @@ export function createDemoBackend() {
       save(s);
       return p.id;
     },
+    async players() {
+      return wait([...load().players].sort((a, b) => a.name.localeCompare(b.name, "es")));
+    },
+    async savePlayer(id, patch) {
+      const s = load();
+      if (patch.phone && s.players.some((p) => p.id !== id && p.phone === patch.phone)) throw new Error("Ya hay un jugador con ese teléfono.");
+      if (id) Object.assign(s.players.find((p) => p.id === id), patch);
+      else s.players.push({ id: (id = crypto.randomUUID()), ...patch });
+      save(s);
+      return wait(id);
+    },
+    async deletePlayer(id) {
+      const s = load();
+      s.players = s.players.filter((p) => p.id !== id);
+      s.bookings.forEach((b) => b.player_id === id && (b.player_id = null));
+      save(s);
+      return wait();
+    },
+    async playerBookings(player) {
+      return wait(load().bookings.filter((b) => !b.cancelled_at && (b.player_id === player.id || (player.phone && b.phone === player.phone))).sort((a, b) => b.starts_at.localeCompare(a.starts_at)));
+    },
   };
+}
+
+/* Pistas y ajustes de la demo (se guardan junto a las reservas). */
+const DEFAULTS = () => ({
+  courts: [1, 2, 3].map((id) => ({ id, name: `Pista ${id}`, sort: id, active: true })),
+  settings: { open: "07:00", close: "22:30", slot_minutes: 30, club_name: "Padel Mes Malgrat", durations: { partido: 90, clase: 60, escuela: 60, snp: 90, americana: 120, torneo: 120, mantenimiento: 60 } },
+});
+function config(s = load()) {
+  if (!s.courts || !s.settings) Object.assign(s, DEFAULTS());
+  return s;
 }

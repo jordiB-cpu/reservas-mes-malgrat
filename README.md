@@ -18,6 +18,15 @@ las cuentas con rol `admin` (Mily y Jordi), con la misma cuenta que la tienda.
 4. Supabase → Authentication → URL Configuration: añade la URL publicada a
    las Redirect URLs (para el enlace de "he olvidado la contraseña").
 
+## Pantallas
+
+- **Día**: las pistas en columnas; tocar un hueco = reservar, tocar una reserva = editarla.
+- **Semana**: parrilla de 7 días en el ordenador; en el móvil, lista por día con su ocupación.
+- **Jugadores**: agenda con buscador; cada ficha tiene llamar, WhatsApp y su historial (próximas, anteriores y sin pagar).
+- **Ajustes**: nombre y estado de cada pista, horario y duración habitual de cada tipo.
+- Instalable en el móvil (Añadir a pantalla de inicio):  + 
+  (el service worker solo guarda la carcasa de la app; las reservas siempre van en directo).
+
 ## Cómo funciona
 
 - Parrilla de 30 minutos, 3 pistas, de 7:00 a 22:30 (tabla `court_settings`).
