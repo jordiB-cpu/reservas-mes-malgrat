@@ -14,7 +14,7 @@ las cuentas con rol `admin` (Mily y Jordi), con la misma cuenta que la tienda.
    No toca nada de la tienda (todas las tablas empiezan por `court_`).
 2. **GitHub**: crea el repositorio privado `reservas-mes-malgrat` y sube esta carpeta.
 3. **Cloudflare** → Workers → crear desde el repositorio, con el nombre
-   `reservas-padel-mes-malgrat` (tiene que coincidir con `wrangler.jsonc`).
+   `reservas-mes-malgrat` (tiene que coincidir con `wrangler.jsonc`).
 4. Supabase → Authentication → URL Configuration: añade la URL publicada a
    las Redirect URLs (para el enlace de "he olvidado la contraseña").
 

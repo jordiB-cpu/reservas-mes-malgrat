@@ -1,7 +1,7 @@
 // Publicación en Cloudflare (Workers con "static assets"), igual que la tienda.
 // "name" TIENE que coincidir con el nombre del Worker en el panel de Cloudflare.
 {
-  "name": "reservas-padel-mes-malgrat",
+  "name": "reservas-mes-malgrat",
   "compatibility_date": "2026-10-15",
   "build": { "command": "npm run build" },
   "preview_urls": true,
