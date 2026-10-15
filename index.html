@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Reservas Mes Malgrat</title>
+    <meta name="description" content="Agenda de pistas de Padel Mes Malgrat (uso interno del club)." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0b0f0d" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+  </head>
+  <body>
+    <svg class="defs" aria-hidden="true" focusable="false">
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></symbol>
+      <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 4.5c4.4 0 7.8 2.9 7.8 6.6s-3.4 6.6-7.8 6.6c-1 0-2-.1-2.9-.4L5 19.5l1.1-3.6C4.9 14.7 4.2 13 4.2 11.1 4.2 7.4 7.6 4.5 12 4.5z" /></symbol>
+      <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M5 11a7 7 0 0 1 12-4.9L19 8M19 4v4h-4M19 13a7 7 0 0 1-12 4.9L5 16M5 20v-4h4" /></symbol>
+    </svg>
+    <header class="appbar">
+      <a class="brand" href="#/" aria-label="Reservas Mes Malgrat, hoy">
+        <img src="/logo.webp" alt="" width="32" height="32" />
+        <span><span translate="no">Mes Malgrat</span> <span class="brand-sub">Reservas</span></span>
+      </a>
+      <div class="userbox" id="userBox"></div>
+    </header>
+    <div class="demo-banner" id="demoBanner" hidden>Modo demo: reservas de ejemplo, guardadas solo en este navegador.</div>
+    <main id="app"></main>
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

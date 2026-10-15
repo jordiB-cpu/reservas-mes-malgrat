@@ -1,0 +1,22 @@
+{
+  "name": "reservas-mes-malgrat",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:demo": "vite --mode demo --port 5184",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:db": "node supabase/test-rls.mjs"
+  },
+  "dependencies": {
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/dm-sans": "^5.3.0",
+    "@supabase/supabase-js": "^2.118.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "vite": "^8.3.4"
+  }
+}

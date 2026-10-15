@@ -1,0 +1,4 @@
+# Saltos de línea LF siempre (igual en Windows y en Cloudflare/Linux)
+* text=auto eol=lf
+*.webp binary
+*.png binary
