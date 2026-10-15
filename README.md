@@ -24,7 +24,7 @@ las cuentas con rol `admin` (Mily y Jordi), con la misma cuenta que la tienda.
 - **Semana**: parrilla de 7 días en el ordenador; en el móvil, lista por día con su ocupación.
 - **Jugadores**: agenda con buscador; cada ficha tiene llamar, WhatsApp y su historial (próximas, anteriores y sin pagar).
 - **Ajustes**: nombre y estado de cada pista, horario y duración habitual de cada tipo.
-- Instalable en el móvil (Añadir a pantalla de inicio):  + 
+- Instalable en el móvil (Añadir a pantalla de inicio): `public/manifest.webmanifest` + `public/sw.js`
   (el service worker solo guarda la carcasa de la app; las reservas siempre van en directo).
 
 ## Cómo funciona
