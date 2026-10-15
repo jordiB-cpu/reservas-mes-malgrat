@@ -54,7 +54,7 @@ export async function renderDay(view, app, key) {
     </div>
     <p class="loading-day" id="dayLoading">Cargando reservas…</p>
   </section>`;
-  document.title = `${dayShort(key)} · Reservas Mes Malgrat`;
+  document.title = `${dayShort(key)} · Reservas Padel Mes Malgrat`;
 
   const board = $("#board", view);
   let bookings = [];

@@ -17,7 +17,7 @@ export async function renderWeek(view, app, key) {
   const rows = Math.round((close - open) / slot);
   const fmt = (k, o) => parseDay(k).toLocaleDateString("es-ES", o);
   const range = `${fmt(mon, { day: "numeric" })}${fmt(mon, { month: "short" }) !== fmt(days[6], { month: "short" }) ? ` ${fmt(mon, { month: "short" }).replace(".", "")}` : ""} – ${fmt(days[6], { day: "numeric", month: "short" }).replace(".", "")}`;
-  document.title = `Semana del ${range} · Reservas Mes Malgrat`;
+  document.title = `Semana del ${range} · Reservas Padel Mes Malgrat`;
 
   view.innerHTML = `
   <section class="week" style="--rows:${rows}; --cols:${app.courts.length}" aria-labelledby="weekTitle">

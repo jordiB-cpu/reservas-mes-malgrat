@@ -4,7 +4,7 @@ import { hhmm, toMin } from "../time.js";
 
 /* Ajustes: nombre y estado de cada pista, horario y duración por tipo. */
 export async function renderSettings(view, app, reload) {
-  document.title = "Ajustes · Reservas Mes Malgrat";
+  document.title = "Ajustes · Reservas Padel Mes Malgrat";
   const s = app.settings;
   const courts = await api.allCourts();
   const hours = [];

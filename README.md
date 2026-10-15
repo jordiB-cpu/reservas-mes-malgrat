@@ -1,4 +1,4 @@
-# Reservas Mes Malgrat
+# Reservas Padel Mes Malgrat
 
 Agenda de pistas del club (sustituye a Playtomic). Uso interno: solo entran
 las cuentas con rol `admin` (Mily y Jordi), con la misma cuenta que la tienda.

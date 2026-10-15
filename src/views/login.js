@@ -2,7 +2,7 @@ import { api } from "../data/index.js";
 import { $, busy, esc, toast } from "../ui.js";
 
 export function renderLogin(view) {
-  document.title = "Entrar · Reservas Mes Malgrat";
+  document.title = "Entrar · Reservas Padel Mes Malgrat";
   view.innerHTML = `
   <section class="gate">
     <img src="/logo.webp" alt="" width="88" height="88" />

@@ -6,7 +6,7 @@ const norm = (s) => String(s ?? "").toLowerCase().normalize("NFD").replace(/[̀-
 
 /* Agenda de jugadores: buscar, ver su historial, editar y llamar/escribir. */
 export async function renderPlayers(view, app, id) {
-  document.title = "Jugadores · Reservas Mes Malgrat";
+  document.title = "Jugadores · Reservas Padel Mes Malgrat";
   view.innerHTML = `
   <section class="page" aria-labelledby="plTitle">
     <div class="page-head">
