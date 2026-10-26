@@ -25,6 +25,8 @@ function seed() {
     b(addDays(t, 1), 2, 8, 60, "mantenimiento", "Limpieza de cristales", null),
     b(addDays(t, 1), 1, 19, 90, "partido", "Juan Pérez", "600111222"),
   ];
+  // En la demo, unas las ha hecho Mily y otras Jordi.
+  bookings.forEach((x, i) => Object.assign(x, { created_by: i % 3 === 0 ? "demo-jordi" : "demo", created_at: new Date().toISOString() }));
   const players = [
     { id: crypto.randomUUID(), name: "Juan Pérez", phone: "600111222" },
     { id: crypto.randomUUID(), name: "Marta Soler", phone: "622333444" },
@@ -60,7 +62,11 @@ export function createDemoBackend() {
 
     async loadConfig() {
       const s = config();
-      return wait({ courts: s.courts.filter((c) => c.active).sort((a, b) => a.sort - b.sort), settings: s.settings });
+      return wait({
+        courts: s.courts.filter((c) => c.active).sort((a, b) => a.sort - b.sort),
+        settings: s.settings,
+        staff: [{ id: "demo", full_name: "Mily (demo)", email: "mily@demo" }, { id: "demo-jordi", full_name: "Jordi (demo)", email: "jordi@demo" }],
+      });
     },
     async allCourts() {
       return wait(config().courts.sort((a, b) => a.sort - b.sort));
@@ -94,7 +100,7 @@ export function createDemoBackend() {
       if (conflicts.length) return wait({ ok: false, ids: [], conflicts });
       const ids = items.map((it) => {
         const id = crypto.randomUUID();
-        s.bookings.push({ id, notes: null, paid: false, series_id: null, player_id: null, phone: null, ...it, cancelled_at: null });
+        s.bookings.push({ id, notes: null, paid: false, series_id: null, player_id: null, phone: null, ...it, cancelled_at: null, created_by: "demo", created_at: new Date().toISOString() });
         return id;
       });
       save(s);

@@ -2,7 +2,7 @@
 // de datos (RLS, court_staff() en supabase/schema.sql), no la web.
 import { createClient } from "@supabase/supabase-js";
 
-const COLS = "id, court_id, starts_at, ends_at, kind, player_id, name, phone, notes, paid, series_id";
+const COLS = "id, court_id, starts_at, ends_at, kind, player_id, name, phone, notes, paid, series_id, created_by, created_at";
 
 function friendly(msg) {
   if (/court_bookings_no_overlap|exclusion/i.test(msg)) return "Ese hueco ya está ocupado en esa pista.";
@@ -43,11 +43,13 @@ export function createSupabaseBackend(url, key) {
     },
 
     async loadConfig() {
-      const [courts, settings] = await Promise.all([
+      const [courts, settings, staff] = await Promise.all([
         sb.from("courts").select("*").eq("active", true).order("sort").then(unwrap),
         sb.from("court_settings").select("key, value, label").then(unwrap),
+        // Quién puede reservar (para saber quién hizo cada reserva).
+        sb.from("profiles").select("id, full_name, email").eq("role", "admin").then(unwrap),
       ]);
-      return { courts, settings: Object.fromEntries(settings.map((s) => [s.key, s.value])) };
+      return { courts, settings: Object.fromEntries(settings.map((s) => [s.key, s.value])), staff };
     },
     async bookings(fromIso, toIso) {
       return unwrap(await sb.from("court_bookings").select(COLS).is("cancelled_at", null).lt("starts_at", toIso).gt("ends_at", fromIso).order("starts_at"));

@@ -1,5 +1,5 @@
 import { api } from "../data/index.js";
-import { KINDS, $, $$, busy, esc, icon, toast, waLink } from "../ui.js";
+import { KINDS, $, $$, busy, esc, icon, staffInfo, toast, waLink } from "../ui.js";
 import { addDays, at, dayKey, dayTitle, hhmm, local, parseDay, toMin, weekday, weeksBetween } from "../time.js";
 
 const DURS = [30, 60, 90, 120, 150, 180];
@@ -46,6 +46,7 @@ export function openSheet(app, { booking, court, day, min }, onDone) {
       <button type="button" class="icon-btn" data-close aria-label="Cerrar">${icon("close")}</button>
     </header>
     <div class="sheet-body">
+      ${editing ? createdLine(app, booking) : ""}
       <fieldset class="seg" aria-label="Pista">
         ${app.courts.map((c) => `<label><input type="radio" name="court" value="${c.id}" ${Number(st.court) === c.id ? "checked" : ""} /><span>${esc(c.name)}</span></label>`).join("")}
       </fieldset>
@@ -295,4 +296,12 @@ export function openSheet(app, { booking, court, day, min }, onDone) {
   dlg.showModal();
   // Solo en ordenador: en el móvil abrir el teclado taparía la hoja.
   if (!editing && matchMedia("(pointer: fine)").matches) setTimeout(() => f.name.focus(), 60);
+}
+
+/* "Reservada por Mily el 26 oct a las 18:03". */
+function createdLine(app, b) {
+  const by = staffInfo(app, b.created_by);
+  if (!by && !b.created_at) return "";
+  const when = b.created_at ? new Date(b.created_at).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).replace(",", " a las") : "";
+  return `<p class="created">${by ? `<span class="by" style="--u:${by.color}">${esc(by.initial)}</span>Reservada por ${esc(by.name)}` : "Reservada"}${when ? ` el ${esc(when)}` : ""}</p>`;
 }

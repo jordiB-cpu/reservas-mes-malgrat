@@ -1,5 +1,5 @@
 import { api } from "../data/index.js";
-import { KINDS, $, esc, icon, reduced, toast } from "../ui.js";
+import { KINDS, $, esc, icon, reduced, staffInfo, staffLegend, toast } from "../ui.js";
 import { addDays, at, dayShort, dayTitle, hhmm, local, toMin, today } from "../time.js";
 import { openSheet } from "./sheet.js";
 
@@ -27,6 +27,7 @@ export async function renderDay(view, app, key) {
       <div class="daytools">
         ${isToday ? "" : `<a class="chip" href="#/dia/${today()}">Hoy</a>`}
         <p class="daysum" id="daySum" aria-live="polite"></p>
+        ${staffLegend(app)}
       </div>
         <div class="board-head">
           <span></span>
@@ -38,7 +39,7 @@ export async function renderDay(view, app, key) {
         <div class="times" aria-hidden="true">
           ${Array.from({ length: rows }, (_, i) => {
             const m = open + i * slot;
-            return `<span class="${m % 60 ? "half" : ""}">${m % 60 ? "" : hhmm(m)}</span>`;
+            return `<span class="${m % 60 ? "half" : ""}">${hhmm(m)}</span>`;
           }).join("")}
         </div>
         ${app.courts.map((c) => `
@@ -83,9 +84,11 @@ export async function renderDay(view, app, key) {
           if (to <= from) return "";
           const k = KINDS[b.kind] ?? KINDS.partido;
           const short = to - from <= slot;
+          const by = staffInfo(app, b.created_by);
           return `<button type="button" class="bk${short ? " short" : ""}${b.paid ? " paid" : ""}" data-id="${b.id}"
-            style="--k:${k.color}; --top:${(from - open) / slot}; --len:${(to - from) / slot}"
-            aria-label="${esc(`${k.label}${b.name ? `, ${b.name}` : ""}, de ${hhmm(a.min)} a ${hhmm(z.min)}${b.paid ? ", pagado" : ""}`)}">
+            style="--k:${k.color}; --u:${by?.color ?? k.color}; --top:${(from - open) / slot}; --len:${(to - from) / slot}"
+            aria-label="${esc(`${k.label}${b.name ? `, ${b.name}` : ""}, de ${hhmm(a.min)} a ${hhmm(z.min)}${b.paid ? ", pagado" : ""}${by ? `, reservada por ${by.name}` : ""}`)}">
+            ${by ? `<span class="by" title="Reservada por ${esc(by.name)}">${esc(by.initial)}</span>` : ""}
             <span class="bk-time">${hhmm(a.min)}–${hhmm(z.min)}</span>
             <span class="bk-name">${esc(b.name || k.label)}</span>
             ${short ? "" : `<span class="bk-meta">${k.label}${b.series_id ? ` ${icon("repeat")}` : ""}${b.paid ? ` ${icon("check")}` : ""}</span>`}

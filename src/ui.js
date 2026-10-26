@@ -67,3 +67,19 @@ export async function busy(btn, fn) {
     }
   }
 }
+
+/* Quién hizo cada reserva: cada administrador con su inicial y su color
+   (distintos de los colores de los tipos de reserva). */
+const STAFF_COLORS = ["#0b0f0d", "#d6336c", "#0e7490", "#a16207"];
+export function staffInfo(app, id) {
+  const list = [...(app.staff ?? [])].sort((a, b) => staffName(a).localeCompare(staffName(b), "es"));
+  const i = list.findIndex((p) => p.id === id);
+  if (i < 0) return null;
+  const name = staffName(list[i]);
+  return { name, initial: name.charAt(0).toUpperCase(), color: STAFF_COLORS[i % STAFF_COLORS.length] };
+}
+export const staffName = (p) => String(p?.full_name || p?.email || "").split(/[ @]/)[0].replace(/^\w/, (c) => c.toUpperCase());
+export const staffLegend = (app) =>
+  (app.staff ?? []).length > 1
+    ? `<span class="legend">Reservada por: ${[...app.staff].map((p) => staffInfo(app, p.id)).sort((a, b) => a.name.localeCompare(b.name, "es")).map((s) => `<span class="legend-item"><span class="by" style="--u:${s.color}">${esc(s.initial)}</span>${esc(s.name)}</span>`).join("")}</span>`
+    : "";

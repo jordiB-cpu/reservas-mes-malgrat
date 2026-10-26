@@ -1,5 +1,5 @@
 import { api } from "../data/index.js";
-import { KINDS, $, esc, icon, toast } from "../ui.js";
+import { KINDS, $, esc, icon, staffInfo, staffLegend, toast } from "../ui.js";
 import { addDays, at, dayShort, hhmm, local, parseDay, toMin, today } from "../time.js";
 import { openSheet } from "./sheet.js";
 
@@ -30,6 +30,7 @@ export async function renderWeek(view, app, key) {
       <div class="daytools">
         ${days.includes(today()) ? "" : `<a class="chip" href="#/semana/${today()}">Esta semana</a>`}
         <p class="daysum" id="weekSum" aria-live="polite">Cargando…</p>
+        ${staffLegend(app)}
       </div>
     </div>
     <div class="wgrid" id="wgrid">
@@ -38,7 +39,7 @@ export async function renderWeek(view, app, key) {
         ${days.map((d) => `<a class="wday${d === today() ? " is-today" : ""}" href="#/dia/${d}"><strong>${esc(dayShort(d))}</strong><small>${app.courts.map((c) => esc(c.name.replace(/^Pista\s*/i, "P"))).join(" · ")}</small></a>`).join("")}
       </div>
       <div class="wgrid-body">
-        <div class="times" aria-hidden="true">${Array.from({ length: rows }, (_, i) => `<span>${(open + i * slot) % 60 ? "" : hhmm(open + i * slot)}</span>`).join("")}</div>
+        <div class="times" aria-hidden="true">${Array.from({ length: rows }, (_, i) => `<span class="${(open + i * slot) % 60 ? "half" : ""}">${hhmm(open + i * slot)}</span>`).join("")}</div>
         ${days.map((d) => `<div class="wcol" data-day="${d}">${app.courts.map((c) => `<div class="wsub" data-court="${c.id}"></div>`).join("")}</div>`).join("")}
       </div>
     </div>
@@ -67,7 +68,7 @@ export async function renderWeek(view, app, key) {
             const a = local(b.starts_at).min, z = local(b.ends_at).min;
             const from = Math.max(a, open), to = Math.min(z, close);
             const k = KINDS[b.kind] ?? KINDS.partido;
-            return `<button type="button" class="wbk" data-id="${b.id}" style="--k:${k.color}; --top:${(from - open) / slot}; --len:${(to - from) / slot}"
+            return `<button type="button" class="wbk" data-id="${b.id}" style="--k:${k.color}; --u:${staffInfo(app, b.created_by)?.color ?? k.color}; --top:${(from - open) / slot}; --len:${(to - from) / slot}"
               title="${esc(`${courtName(c.id)}, ${hhmm(a)}–${hhmm(z)}: ${b.name || k.label}`)}" aria-label="${esc(`${dayShort(d)}, ${courtName(c.id)}, ${hhmm(a)} a ${hhmm(z)}, ${b.name || k.label}`)}"><span>${esc(b.name || k.label)}</span></button>`;
           })
           .join("");

@@ -142,7 +142,7 @@ ul { padding: 0; list-style: none; }
   position: absolute; left: 3px; right: 3px; pointer-events: auto;
   top: calc(var(--top) * var(--row) + 2px); height: calc(var(--len) * var(--row) - 4px);
   display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 6px 8px; overflow: hidden; text-align: left;
-  border: 0; border-left: 4px solid var(--k); border-radius: 10px;
+  border: 0; border-left: 5px solid var(--u, var(--k)); border-radius: 10px; padding-right: 30px;
   background: color-mix(in srgb, var(--k) 13%, var(--white)); color: var(--ink);
   transition: transform 0.35s var(--spring), background-color 0.25s var(--ease);
   animation: bk-in 0.45s var(--ease-out) both;
@@ -363,7 +363,7 @@ ul { padding: 0; list-style: none; }
 .wsub:hover { background: rgba(0, 122, 70, 0.05); }
 .wbk {
   position: absolute; left: 0; right: 0; top: calc(var(--top) * var(--row) + 1px); height: calc(var(--len) * var(--row) - 2px);
-  border: 0; border-radius: 5px; padding: 2px 3px; overflow: hidden; background: var(--k); color: var(--white); text-align: left;
+  border: 0; border-top: 4px solid var(--u, var(--k)); border-radius: 5px; padding: 2px 3px; overflow: hidden; background: var(--k); color: var(--white); text-align: left;
   font-size: 10px; font-weight: 700; line-height: 1.15; transition: filter 0.2s var(--ease), transform 0.3s var(--spring);
 }
 .wbk span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
@@ -401,4 +401,25 @@ ul { padding: 0; list-style: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Quién hizo la reserva: inicial en un círculo con el color de cada administrador
+   (la barra izquierda de la reserva lleva ese mismo color). */
+.by {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--u); color: var(--white); font-size: 12px; font-weight: 700; line-height: 1; flex: none;
+}
+.bk > .by { position: absolute; top: 5px; right: 5px; }
+.bk.short > .by { width: 18px; height: 18px; font-size: 11px; top: 50%; translate: 0 -50%; }
+.legend { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); font-weight: 600; flex-wrap: wrap; justify-content: center; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); }
+.created { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); }
+
+/* Horas de media en media hora: las :30 más pequeñas y suaves. */
+.times span.half { font-size: 11px; font-weight: 500; opacity: 0.75; }
+.daytools { flex-wrap: wrap; row-gap: 4px; }
+@media (max-width: 560px) {
+  .bk { padding-right: 22px; }
+  .bk > .by { width: 17px; height: 17px; font-size: 10px; top: 4px; right: 3px; }
+  .times span.half { font-size: 10px; }
 }
