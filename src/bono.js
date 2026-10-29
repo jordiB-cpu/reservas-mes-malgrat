@@ -95,11 +95,16 @@ function entradas(b, e) {
 
 const precioProducto = (p) => (typeof p.ahora === "string" ? esc(p.ahora) : p.ahora === 0 ? "Gratis" : euros(p.ahora));
 
-function tarjetaElegir(el) {
+// La barra cuenta clases: los bonos ya acabados de la campaña enteros, más las hechas del actual.
+// Ej.: 3 bonos de 10 = 30 clases; Andrea, en su primer bono con 4 hechas, va por 4 de 30.
+function tarjetaElegir(el, actual, e) {
   const faltan = el.cada - el.llevas;
   const [, m, d] = el.hasta.split("-").map(Number);
   const dias = Math.max(0, Math.ceil((new Date(el.hasta + "T23:59:59") - new Date()) / 864e5));
-  const pct = el.cada > 1 ? Math.round((Math.max(0, el.llevas - 1) / (el.cada - 1)) * 100) : 100;
+  const porBono = actual.clases;
+  const total = el.cada * porBono;
+  const hechas = Math.min(total, Math.max(0, el.llevas - 1) * porBono + e.usadas);
+  const pct = Math.round((hechas / total) * 100);
   const texto = (p) => `Hola Jordi, ${faltan ? "me gustaría ir a por" : "elijo"}: ${p.nombre} 🎾`;
   return `
     <section class="c c-fino">
@@ -112,8 +117,8 @@ function tarjetaElegir(el) {
         </a>`).join("")}
       </div>
       <div class="pgr" aria-hidden="true"><div class="ln"><span style="width:${pct}%"></span></div>
-        <div class="pn">${Array.from({ length: el.cada }, (_, i) => `<i class="${i < el.llevas ? "on" : i === el.cada - 1 ? "end" : ""}"></i>`).join("")}</div></div>
-      <div class="fm"><b>${el.llevas} de ${el.cada} bonos</b><span>${faltan ? `Te faltan ${faltan} · quedan ${dias} días` : "¡Ya puedes elegir!"}</span></div>
+        <div class="pn">${Array.from({ length: el.cada }, (_, i) => `<i style="left:${((i + 1) / el.cada) * 100}%" class="${hechas >= (i + 1) * porBono ? "on" : i === el.cada - 1 ? "end" : ""}"></i>`).join("")}</div></div>
+      <div class="fm"><b>${hechas} de ${total} clases</b><span>${faltan ? `Te faltan ${faltan} · quedan ${dias} días` : "¡Ya puedes elegir!"}</span></div>
     </section>`;
 }
 
@@ -248,7 +253,7 @@ function pintar() {
       ${terminado ? `<p class="aviso">Renuévalo abajo para seguir jugando.</p>` : ""}
     </section>
     ${tarjetaAMano()}
-    ${d.elegir ? tarjetaElegir(d.elegir) : ""}
+    ${d.elegir ? tarjetaElegir(d.elegir, actual, e) : ""}
     ${d.agenda ? calendario(d.agenda) : ""}
     ${tarjetaRenovar(d, e.quedan)}
     <p class="pie">Actualizado ${larga(d.actualizado)}, ${hora(d.actualizado)}</p>`;
