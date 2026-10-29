@@ -174,7 +174,7 @@ function calendario(agenda) {
     <section class="c" id="cal">
       <div class="calh"><div class="lbl">📅 ¿Cuándo vienes?</div><button type="button" data-ancho>${ancho ? "‹ Menos" : "Ampliar ›"}</button></div>
       ${g}${detalle(items.find((y) => idDe(y) === sel))}
-      <p class="manana">☀️ Por las mañanas, pídeme la hora que quieras.</p>
+      <p class="manana">☀️ Mañanas: clases solo con reserva previa y según disponibilidad.</p>
     </section>`;
 }
 
@@ -193,6 +193,26 @@ function tarjetaRenovar(d, quedan) {
       <h2>${titulo}</h2>
       <a class="btnw" href="${wa(`Hola Jordi, quiero renovar mi bono 🎾${queda}`)}" target="_blank" rel="noopener">Renovar mi bono</a>
       ${r ? `<p class="save">Pack de ${r.clases} (${euros(r.precio)}): ahorras <b>${euros(r.ahorro)}</b></p>` : ""}
+    </section>`;
+}
+
+// Guardar el bono en la pantalla de inicio: pasos grandes solo para su móvil.
+// Si ya lo abre desde el icono (modo app), no se enseña.
+function tarjetaAMano() {
+  const enApp = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (enApp) return "";
+  const ua = navigator.userAgent;
+  const iphone = /iPhone|iPad|iPod/.test(ua);
+  const android = /Android/.test(ua);
+  const pasos = (titulo, lista) => `<p class="am-os">${titulo}</p><ol class="am-pasos">${lista.map((p) => `<li><span>${p}</span></li>`).join("")}</ol>`;
+  const ios = pasos("En iPhone", ["Toca el botón <b>Compartir</b> <span class=\"am-ico\" aria-hidden=\"true\">⬆︎</span> de abajo.", "Baja y toca <b>«Añadir a pantalla de inicio»</b>.", "Toca <b>«Añadir»</b>. ¡Listo!"]);
+  const andr = pasos("En Android", ["Toca los <b>tres puntos</b> <span class=\"am-ico\" aria-hidden=\"true\">⋮</span> de arriba a la derecha.", "Toca <b>«Añadir a pantalla de inicio»</b>.", "Toca <b>«Añadir»</b>. ¡Listo!"]);
+  return `
+    <section class="c c-amano">
+      <h2>📲 Ten tu bono a un toque</h2>
+      <p class="am-sub">Guárdalo en el móvil y te saldrá un icono como el de una app.</p>
+      ${iphone ? ios : android ? andr : ios + andr}
+      <p class="am-nota">Si lo has abierto desde WhatsApp y no ves esos botones, toca primero «Abrir en el navegador».</p>
     </section>`;
 }
 
@@ -227,15 +247,10 @@ function pintar() {
       <p class="sub">${esc(actual.tipo)}${precio}</p>
       ${terminado ? `<p class="aviso">Renuévalo abajo para seguir jugando.</p>` : ""}
     </section>
+    ${tarjetaAMano()}
     ${d.elegir ? tarjetaElegir(d.elegir) : ""}
     ${d.agenda ? calendario(d.agenda) : ""}
     ${tarjetaRenovar(d, e.quedan)}
-    <details class="c truco">
-      <summary>Tenerlo siempre a mano</summary>
-      <p><b>iPhone:</b> botón compartir <span aria-hidden="true">⎙</span> → «Añadir a pantalla de inicio».</p>
-      <p><b>Android:</b> menú <span aria-hidden="true">⋮</span> → «Añadir a pantalla de inicio».</p>
-      <p>Te quedará un icono como una app. También puedes volver a abrir el enlace del WhatsApp.</p>
-    </details>
     <p class="pie">Actualizado ${larga(d.actualizado)}, ${hora(d.actualizado)}</p>`;
 }
 

@@ -1,10 +1,10 @@
 /* Página pública del bono: marino de noche, blanco para el bono, dorado para lo que llevas,
    coral para actuar. Pensada para el móvil: una sola columna y letra grande. */
 :root {
-  --navy: #0b1430;
-  --navy-2: #131c3d;
-  --card: #18224a;
-  --line: #26305c;
+  --navy: #1a2452;
+  --navy-2: #1f2958;
+  --card: #26306a;
+  --line: #36407a;
   --ink: #0b1022;
   --mut: #6b7390;
   --soft: #9aa6cf;
@@ -18,7 +18,8 @@
 }
 *, *::before, *::after { box-sizing: border-box; }
 body.bono-body { margin: 0; color: #fff; font: 500 16px/1.4 var(--font); -webkit-font-smoothing: antialiased;
-  background: linear-gradient(180deg, var(--navy) 0, var(--navy) 380px, var(--navy-2) 380px); min-height: 100vh; }
+  background: radial-gradient(130% 55% at 85% 0, rgba(255,138,92,.28), transparent 62%), radial-gradient(90% 40% at 0 30%, rgba(245,165,36,.10), transparent 70%), linear-gradient(180deg, var(--navy) 0, var(--navy-2) 100%);
+  background-attachment: fixed; min-height: 100vh; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
 .bono { max-width: 480px; margin: 0 auto; padding: 0 14px calc(32px + env(safe-area-inset-bottom)); }
@@ -57,11 +58,11 @@ button { font: inherit; color: inherit; }
 .aviso { margin: 10px 0 0; font-size: 14px; font-weight: 700; color: var(--coral); }
 
 /* Elegir: fino y elegante */
-.c-fino { background: #0f1733; border: 1px solid rgba(245,165,36,.45); }
+.c-fino { background: #202a5e; border: 1px solid rgba(245,165,36,.45); }
 .fh { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-2); }
 .c-fino h2 { font-size: 22px; font-weight: 500; margin: 8px 0 0; letter-spacing: -.01em; }
 .prods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
-.pr { border: 1px solid var(--line); border-radius: 16px; padding: 8px 8px 10px; text-align: center; background: #121b3c; display: block; }
+.pr { border: 1px solid var(--line); border-radius: 16px; padding: 8px 8px 10px; text-align: center; background: #2a3470; display: block; }
 .pr:active { border-color: var(--gold); }
 .pr .im { aspect-ratio: 1; border-radius: 12px; background: #fff; display: grid; place-items: center; overflow: hidden; }
 .pr img { width: 88%; height: 88%; object-fit: contain; }
@@ -69,10 +70,10 @@ button { font: inherit; color: inherit; }
 .pr span { display: block; font-size: 12px; color: var(--gold-2); margin-top: 3px; }
 .pr s { color: #6f7aa3; margin-right: 3px; }
 .pgr { position: relative; margin-top: 18px; height: 14px; }
-.pgr .ln { position: absolute; left: 6px; right: 6px; top: 6px; height: 2px; background: #2a3460; }
+.pgr .ln { position: absolute; left: 6px; right: 6px; top: 6px; height: 2px; background: #3e4880; }
 .pgr .ln span { display: block; height: 100%; background: var(--gold); }
 .pn { position: absolute; inset: 0; display: flex; justify-content: space-between; }
-.pn i { width: 14px; height: 14px; border-radius: 50%; background: #0f1733; border: 2px solid #2a3460; }
+.pn i { width: 14px; height: 14px; border-radius: 50%; background: #202a5e; border: 2px solid #3e4880; }
 .pn i.on { background: var(--gold); border-color: var(--gold); }
 .pn i.end { border-color: var(--gold-2); }
 .fm { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; font-size: 13px; }
@@ -86,7 +87,7 @@ button { font: inherit; color: inherit; }
 .gh { text-align: center; font-size: 11px; color: var(--soft); font-weight: 700; }
 .gh b { display: block; font-size: 15px; color: #fff; }
 .hr { font-size: 10px; color: #6f7aa3; text-align: right; padding-right: 3px; align-self: center; }
-.k { height: 36px; border-radius: 7px; background: #121a38; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1.1; border: 0; padding: 0; }
+.k { height: 36px; border-radius: 7px; background: #2a3468; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1.1; border: 0; padding: 0; }
 .grid.ancho .k { height: 44px; font-size: 10px; }
 button.k { cursor: pointer; }
 .k.li { background: rgba(61,220,151,.2); border: 1.5px solid var(--free); color: var(--free); }
@@ -106,7 +107,7 @@ button.k { cursor: pointer; }
 .det span { font-size: 12px; opacity: .85; }
 .go { font-size: 13px; font-weight: 700; padding: 9px 12px; border-radius: 11px; white-space: nowrap; background: var(--coral); color: #fff; }
 .det.li .go { background: var(--free); color: #06281a; }
-.manana, .vacio { margin: 10px 0 0; font-size: 12px; color: var(--soft); padding: 8px 10px; border-radius: 10px; background: #0f1734; }
+.manana, .vacio { margin: 10px 0 0; font-size: 12px; color: var(--soft); padding: 8px 10px; border-radius: 10px; background: #202a5e; }
 
 /* Renovar */
 .c-next { background: linear-gradient(135deg, #ff5a5f, #ff2e63); border: none; }
@@ -117,6 +118,16 @@ button.k { cursor: pointer; }
 .save { margin: 10px 0 0; font-size: 13px; color: #ffe1e3; }
 .save b { color: #fff; }
 
+/* Tenerlo a mano: claro y grande, para quien no se maneja con el móvil */
+.c-amano { background: #fff6e6; color: var(--ink); border: 1.5px solid #f5c26b; }
+.c-amano h2 { margin: 0; font-size: 21px; }
+.am-sub { margin: 4px 0 0; font-size: 15px; color: #5b4a2e; }
+.am-os { margin: 14px 0 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: #b06f00; }
+.am-pasos { margin: 0; padding: 0; list-style: none; counter-reset: paso; display: grid; gap: 8px; }
+.am-pasos li { counter-increment: paso; display: flex; align-items: center; gap: 10px; font-size: 16px; line-height: 1.3; background: #fff; border-radius: 12px; padding: 10px 12px; }
+.am-pasos li::before { content: counter(paso); flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: #2a1300; display: grid; place-items: center; font-family: var(--font-num); font-size: 14px; }
+.am-ico { display: inline-grid; place-items: center; min-width: 24px; height: 24px; border-radius: 6px; background: #eef0f6; font-weight: 700; }
+.am-nota { margin: 10px 0 0; font-size: 13px; color: #7a6a4e; }
 .truco summary { cursor: pointer; font-weight: 700; color: var(--soft); font-size: 14px; }
 .truco p { margin: 10px 0 0; font-size: 14px; color: #dfe4f5; }
 .grande-txt { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
