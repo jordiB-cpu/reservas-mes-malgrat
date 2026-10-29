@@ -1,0 +1,61 @@
+/* Página pública del bono: mismos colores que la app (noche, cal y verde del escudo).
+   Pensada para gente que no sabe de tecnología: letra grande, una sola columna. */
+:root {
+  --night: #0b0f0d;
+  --cal: #f1f2ee;
+  --cal-3: #d6dbd5;
+  --white: #ffffff;
+  --ink: #0f1411;
+  --ink-2: #4a544e;
+  --chalk: #f3f5f0;
+  --chalk-2: #a9b3ad;
+  --green: #007a46;
+  --alert: #b42318;
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body.bono-body { margin: 0; background: var(--cal); color: var(--ink); font: 400 18px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+.bono { max-width: 480px; margin: 0 auto; padding: 0 16px calc(32px + env(safe-area-inset-bottom)); }
+.bono-cargando { padding: 48px 0; text-align: center; color: var(--ink-2); }
+
+.bono-cab { background: var(--night); color: var(--chalk); margin: 0 -16px; padding: calc(24px + env(safe-area-inset-top)) 16px 28px; text-align: center; }
+.bono-cab img { margin: 0 auto 8px; border-radius: 50%; }
+.bono-cab .club { margin: 0; color: var(--chalk-2); font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
+.bono-cab h1 { margin: 4px 0 0; font: 400 clamp(36px, 11vw, 52px)/1.05 var(--font-display); letter-spacing: 0.01em; overflow-wrap: anywhere; }
+
+.tarjeta { background: var(--white); border-radius: 18px; padding: 20px; margin-top: 16px; box-shadow: 0 1px 0 var(--cal-3); }
+.tipo { margin: 0; color: var(--ink-2); font-size: 16px; font-weight: 700; text-align: center; }
+.quedan { margin: 6px 0 18px; display: flex; flex-direction: column; align-items: center; }
+.quedan .num { font: 400 96px/1 var(--font-display); color: var(--green); }
+.quedan.fin .num { color: var(--alert); }
+.quedan .txt { font-size: 20px; font-weight: 700; }
+
+.casillas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.casillas.c10 { grid-template-columns: repeat(5, 1fr); }
+.casillas.c1 { grid-template-columns: 1fr; max-width: 120px; margin: 0 auto; }
+.casilla { aspect-ratio: 1; border: 3px solid var(--ink); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.casilla .marca { font: 400 32px/1 var(--font-display); min-height: 32px; }
+.casilla .dia { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.casillas.c10 .casilla .marca { font-size: 24px; min-height: 24px; }
+.casillas.c10 .casilla .dia { font-size: 11px; }
+.casilla.hecha { background: var(--ink); color: var(--white); }
+.casilla.hecha .dia { color: var(--chalk-2); }
+.casilla.prevista { border-style: dashed; border-color: var(--green); color: var(--green); }
+.casilla.prevista .marca { font-size: 18px; }
+.casilla.libre { border-color: var(--cal-3); }
+.casilla.libre .dia { color: var(--chalk-2); }
+.aviso { margin: 16px 0 0; text-align: center; font-weight: 700; color: var(--alert); }
+
+.filas { padding: 4px 20px; }
+.fila { display: flex; flex-direction: column; padding: 14px 0; }
+.fila + .fila { border-top: 1px solid var(--cal-3); }
+.fila .et { font-size: 14px; color: var(--ink-2); }
+.fila .val { font-size: 20px; font-weight: 700; }
+.fila .val::first-letter { text-transform: uppercase; }
+
+.truco summary { cursor: pointer; font-weight: 700; }
+.truco p { margin: 10px 0 0; font-size: 16px; }
+.grande-txt { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+.pie { margin: 20px 0 0; text-align: center; font-size: 13px; color: var(--ink-2); }
+.btn-bono { font: 700 18px var(--font); background: var(--green); color: var(--white); border: 0; border-radius: 999px; padding: 12px 24px; }
