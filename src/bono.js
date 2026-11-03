@@ -109,7 +109,7 @@ function tarjetaElegir(el) {
   const texto = (x) => `Hola Jordi, ${p.ganados ? "elijo mi regalo" : "cuando llegue, me gustaría"}: ${x.nombre} 🎾`;
   const foto = (x) => x.tipo === "descuento" || !x.img
     ? `<div class="im im-dto"><b class="num">${esc(x.ahora)}</b></div>`
-    : `<div class="im"><img src="/premios/${encodeURIComponent(x.img)}" alt="" loading="lazy" /></div>`;
+    : `<div class="im"><img src="/premios/${encodeURIComponent(x.img)}" alt="" /></div>`;
   const precio = (x) => x.tipo === "descuento" ? "Al renovar" : `${x.antes ? `<s>${euros(x.antes)}</s>` : ""}${precioProducto(x)}`;
   const rayas = Array.from({ length: el.cada }, (_, i) => `<i class="${p.ganados || i < p.tramo ? "on" : ""}"></i>`).join("");
   return `
