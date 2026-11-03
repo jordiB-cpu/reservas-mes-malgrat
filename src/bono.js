@@ -78,19 +78,11 @@ function estado(b, ahora) {
   return { hechas, futuras, usadas, quedan: Math.max(0, b.clases - usadas) };
 }
 
-// Una entrada por clase: picada (hecha), con fecha (prevista) o en blanco.
-function entradas(b, e) {
-  const out = [];
-  for (let i = 0; i < b.clases; i++) {
-    const n = `<b>${i + 1}</b>`;
-    if (i < b.antes) out.push(`<li class="on">${n}<i>hecha</i></li>`);
-    else if (i < e.usadas) out.push(`<li class="on">${n}<i>${corta(e.hechas[i - b.antes].inicio)}</i></li>`);
-    else {
-      const s = e.futuras[i - e.usadas];
-      out.push(s ? `<li class="nx">${n}<i>${b.clases > 5 ? corta(s.inicio) : `${corta(s.inicio)} · ${hora(s.inicio)}`}</i></li>` : `<li>${n}</li>`);
-    }
-  }
-  return `<ol class="tix${b.clases > 5 ? " c10" : ""}" aria-label="${e.usadas} de ${b.clases} clases hechas">${out.join("")}</ol>`;
+// Una raya por clase: dorada si está hecha.
+function barra(b, e) {
+  const rayas = Array.from({ length: b.clases }, (_, i) => `<i class="${i < e.usadas ? "on" : ""}"></i>`).join("");
+  return `<div class="seg" aria-hidden="true">${rayas}</div>
+    <div class="segt"><span>${e.usadas} ${e.usadas === 1 ? "hecha" : "hechas"}</span><span>${e.quedan} por hacer</span></div>`;
 }
 
 const precioProducto = (p) => (typeof p.ahora === "string" ? esc(p.ahora) : p.ahora === 0 ? "Gratis" : euros(p.ahora));
@@ -183,29 +175,26 @@ function calendario(agenda) {
     </section>`;
 }
 
-function tarjetaRenovar(d, quedan) {
-  const el = d.elegir;
-  let titulo = "Tu próximo bono, con un toque";
-  if (el && el.llevas < el.cada) {
-    const tras = el.cada - el.llevas - 1;
-    titulo = tras === 0 ? "Renueva y eliges" : `Renueva y estarás a ${tras === 1 ? "1 bono" : `${tras} bonos`} de elegir`;
-  }
+const ICONO_WA = `<svg class="wa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.6-.3.4c-.1.1-.2.3-.1.5.2.3.8 1.3 1.7 2 1.1 1 2 1.3 2.3 1.4.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.8-.1 1.3z"/></svg>`;
+
+function botonRenovar(d, quedan) {
   const r = d.renovar;
   const queda = quedan ? ` (me ${quedan === 1 ? "queda 1 clase" : `quedan ${quedan} clases`})` : "";
   return `
-    <section class="c c-next">
-      <div class="lbl">🔁 Tu siguiente bono</div>
-      <h2>${titulo}</h2>
-      <a class="btnw" href="${wa(`Hola Jordi, quiero renovar mi bono 🎾${queda}`)}" target="_blank" rel="noopener">Renovar mi bono</a>
-      ${r ? `<p class="save">Pack de ${r.clases} (${euros(r.precio)}): ahorras <b>${euros(r.ahorro)}</b></p>` : ""}
-    </section>`;
+    <a class="btn-wa" href="${wa(`Hola Jordi, quiero renovar mi bono 🎾${queda}`)}" target="_blank" rel="noopener">${ICONO_WA} Renovar mi bono</a>
+    ${r ? `<p class="save">Pack de ${r.clases} (${euros(r.precio)}): ahorras <b>${euros(r.ahorro)}</b></p>` : ""}`;
 }
 
+// Lo secundario va plegado: una fila que se abre al tocarla.
+const abierto = { cal: false, regalo: false, guardar: false };
+const fila = (clave, icono, titulo, sub) => `
+  <button type="button" class="fila${abierto[clave] ? " on" : ""}" data-abre="${clave}" aria-expanded="${abierto[clave]}">
+    <span class="fi-ic" aria-hidden="true">${icono}</span><span class="fi-tx"><b>${titulo}</b><span>${sub}</span></span><em aria-hidden="true">›</em>
+  </button>`;
+
 // Guardar el bono en la pantalla de inicio: pasos grandes solo para su móvil.
-// Si ya lo abre desde el icono (modo app), no se enseña.
+// Si ya lo abre desde el icono (modo app), pintar() no ofrece la guía.
 function tarjetaAMano() {
-  const enApp = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-  if (enApp) return "";
   const ua = navigator.userAgent;
   const iphone = /iPhone|iPad|iPod/.test(ua);
   const android = /Android/.test(ua);
@@ -242,27 +231,32 @@ function pintar() {
   const proxima = bonos.flatMap((b) => b.sesiones).find((s) => new Date(s.fin) > ahora);
   const terminado = e.quedan === 0;
   const precio = actual.precio ? ` · ${euros(actual.precio)}${actual.tarifa === "equipo" ? " (equipo)" : ""}` : actual.precio === 0 ? " · regalo" : "";
-  const sub = proxima ? `Próxima: ${larga(proxima.inicio)} · ${hora(proxima.inicio)}` : terminado ? "Bono terminado" : "Elige tu próxima clase abajo";
+  const cuando = proxima ? `${larga(proxima.inicio)}, ${hora(proxima.inicio)}` : "";
+  const el = d.elegir;
+  const enApp = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
 
   $bono.innerHTML = cabecera + `
     <section class="c c-bono">
-      <div class="q${terminado ? " fin" : ""}"><b class="num">${e.quedan}</b>
-        <span>${e.quedan === 1 ? "clase te queda" : "clases te quedan"}<small>${sub}</small></span></div>
-      ${entradas(actual, e)}
+      <p class="te">${terminado ? "Bono terminado" : e.quedan === 1 ? "Te queda" : "Te quedan"}</p>
+      <div class="big${terminado ? " fin" : ""}"><b class="num">${e.quedan}</b><span>de ${actual.clases} clases</span></div>
+      ${barra(actual, e)}
+      ${proxima
+        ? `<div class="prox"><small>📅 Próxima clase</small><b>${cuando}</b></div>`
+        : terminado ? `<div class="prox fin"><b>Renuévalo para seguir jugando</b></div>` : ""}
       <p class="sub">${esc(actual.tipo)}${precio}</p>
-      ${terminado ? `<p class="aviso">Renuévalo abajo para seguir jugando.</p>` : ""}
     </section>
-    ${tarjetaAMano()}
-    ${d.elegir ? tarjetaElegir(d.elegir, actual, e) : ""}
-    ${d.agenda ? calendario(d.agenda) : ""}
-    ${tarjetaRenovar(d, e.quedan)}
+    ${botonRenovar(d, e.quedan)}
+    ${d.agenda ? fila("cal", "📅", "Huecos libres esta semana", "Toca para ver y pedir hora") + (abierto.cal ? calendario(d.agenda) : "") : ""}
+    ${el ? fila("regalo", "🎁", `Con ${el.cada} bonos, eliges regalo`, "Mira los productos y lo que llevas") + (abierto.regalo ? tarjetaElegir(el, actual, e) : "") : ""}
+    ${enApp ? "" : `<button type="button" class="guarda" data-abre="guardar">📲 <u>Guárdalo en tu móvil</u> para tenerlo a un toque</button>${abierto.guardar ? tarjetaAMano() : ""}`}
     <p class="pie">Actualizado ${larga(d.actualizado)}, ${hora(d.actualizado)}</p>`;
 }
 
 $bono.addEventListener("click", (ev) => {
-  const t = ev.target.closest("[data-sel], [data-ancho]");
+  const t = ev.target.closest("[data-sel], [data-ancho], [data-abre]");
   if (!t) return;
-  if (t.hasAttribute("data-ancho")) ancho = !ancho;
+  if (t.hasAttribute("data-abre")) abierto[t.dataset.abre] = !abierto[t.dataset.abre];
+  else if (t.hasAttribute("data-ancho")) ancho = !ancho;
   else sel = t.dataset.sel;
   pintar();
 });
