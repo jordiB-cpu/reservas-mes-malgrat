@@ -64,6 +64,11 @@ button { font: inherit; color: inherit; }
 .pr b { display: block; font-size: 12px; font-weight: 700; margin-top: 8px; line-height: 1.15; }
 .pr span { display: block; font-size: 12px; color: var(--gold-2); margin-top: 3px; }
 .pr s { color: #6f7aa3; margin-right: 3px; }
+.rg-seg { display: flex; gap: 3px; margin-top: 14px; }
+.rg-seg i { flex: 1; height: 10px; border-radius: 4px; background: #3e4880; }
+.rg-seg i.on { background: var(--gold); }
+.im-dto { background: linear-gradient(135deg, #ffd36b, #f5a524) !important; }
+.im-dto b { font-size: 22px; color: #2a1300; white-space: nowrap; }
 .pgr { position: relative; margin: 18px 7px 0; height: 14px; }
 .pgr .ln { position: absolute; left: 0; right: 0; top: 5px; height: 4px; border-radius: 4px; background: #3e4880; overflow: hidden; }
 .pgr .ln span { display: block; height: 100%; background: var(--gold); border-radius: 4px; }

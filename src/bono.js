@@ -62,10 +62,13 @@ function demo() {
       ],
     },
     renovar: { clases: 10, precio: 150, ahorro: 12.5 },
-    elegir: { titulo: "Otoño", hasta: dia(62), cada: 3, llevas: 1, productos: [
-      { nombre: "Pala Wilson", img: "pala.webp", antes: 229, ahora: "−15 %" },
-      { nombre: "Sudadera del club", img: "sudadera.webp", antes: 48, ahora: 35 },
-      { nombre: "Gorra Wilson", img: "gorra.webp", antes: 35, ahora: 0 },
+    elegir: { titulo: "Otoño", hasta: dia(58), cada: 16, llevas: 4, productos: [
+      { nombre: "Muñequeras Wilson (2)", img: "munequeras.webp", antes: 10, ahora: 0 },
+      { nombre: "Pala Wilson Blade V4", img: "pala-blade-v4.webp", antes: 190, ahora: 152 },
+      { nombre: "Wilson Rush Pro 5 (hombre)", img: "zapatilla-rush-pro-5.webp", antes: 160, ahora: 128 },
+      { nombre: "Wilson Intrigue Pro Clay (mujer)", img: "zapatilla-intrigue-pro-clay.webp", antes: 130, ahora: 104 },
+      { nombre: "Sudadera del club", img: "sudadera.webp", antes: 40, ahora: 29.99 },
+      { nombre: "10 % en tu próximo bono", tipo: "descuento", ahora: "−10 %" },
     ] },
   };
 }
@@ -87,30 +90,40 @@ function barra(b, e) {
 
 const precioProducto = (p) => (typeof p.ahora === "string" ? esc(p.ahora) : p.ahora === 0 ? "Gratis" : euros(p.ahora));
 
-// La barra cuenta clases: los bonos ya acabados de la campaña enteros, más las hechas del actual.
-// Ej.: 3 bonos de 10 = 30 clases; Andrea, en su primer bono con 4 hechas, va por 4 de 30.
-function tarjetaElegir(el, actual, e) {
-  const faltan = el.cada - el.llevas;
+// Regalos: se cuentan clases (cada 8 en individual, cada 16 en compartido; lo decide bonos-web.js).
+// Al llegar a la cifra puede elegir uno, y la cuenta sigue para el siguiente.
+const progresoRegalo = (el) => {
+  const ganados = Math.floor(el.llevas / el.cada);
+  const tramo = el.llevas % el.cada;
+  return { ganados, tramo, faltan: el.cada - tramo };
+};
+const resumenRegalo = (el) => {
+  const p = progresoRegalo(el);
+  return p.ganados ? "¡Ya puedes elegir tu regalo!" : `Llevas ${p.tramo} de ${el.cada} clases`;
+};
+
+function tarjetaElegir(el) {
+  const p = progresoRegalo(el);
   const [, m, d] = el.hasta.split("-").map(Number);
   const dias = Math.max(0, Math.ceil((new Date(el.hasta + "T23:59:59") - new Date()) / 864e5));
-  const porBono = actual.clases;
-  const total = el.cada * porBono;
-  const hechas = Math.min(total, Math.max(0, el.llevas - 1) * porBono + e.usadas);
-  const pct = Math.round((hechas / total) * 100);
-  const texto = (p) => `Hola Jordi, ${faltan ? "me gustaría ir a por" : "elijo"}: ${p.nombre} 🎾`;
+  const texto = (x) => `Hola Jordi, ${p.ganados ? "elijo mi regalo" : "cuando llegue, me gustaría"}: ${x.nombre} 🎾`;
+  const foto = (x) => x.tipo === "descuento" || !x.img
+    ? `<div class="im im-dto"><b class="num">${esc(x.ahora)}</b></div>`
+    : `<div class="im"><img src="/premios/${encodeURIComponent(x.img)}" alt="" loading="lazy" /></div>`;
+  const precio = (x) => x.tipo === "descuento" ? "Al renovar" : `${x.antes ? `<s>${euros(x.antes)}</s>` : ""}${precioProducto(x)}`;
+  const rayas = Array.from({ length: el.cada }, (_, i) => `<i class="${p.ganados || i < p.tramo ? "on" : ""}"></i>`).join("");
   return `
     <section class="c c-fino">
       <div class="fh"><span>${esc(el.titulo)}</span><span>hasta el ${d} de ${MESES[m - 1]}</span></div>
-      <h2>Con ${el.cada} bonos, eliges uno</h2>
-      <div class="prods">${el.productos.map((p) => `
-        <a class="pr" href="${wa(texto(p))}" target="_blank" rel="noopener">
-          <div class="im"><img src="/premios/${encodeURIComponent(p.img)}" alt="" loading="lazy" /></div>
-          <b>${esc(p.nombre)}</b><span>${p.antes ? `<s>${euros(p.antes)}</s>` : ""}${precioProducto(p)}</span>
+      <h2>Cada ${el.cada} clases, eliges un regalo</h2>
+      <div class="rg-seg" aria-hidden="true">${rayas}</div>
+      <div class="fm"><b>${resumenRegalo(el)}</b><span>${p.ganados ? "Toca el que quieras" : `Te faltan ${p.faltan} · quedan ${dias} días`}</span></div>
+      <div class="prods">${el.productos.map((x) => `
+        <a class="pr" href="${wa(texto(x))}" target="_blank" rel="noopener">
+          ${foto(x)}
+          <b>${esc(x.nombre)}</b><span>${precio(x)}</span>
         </a>`).join("")}
       </div>
-      <div class="pgr" aria-hidden="true"><div class="ln"><span style="width:${pct}%"></span></div>
-        <div class="pn">${Array.from({ length: el.cada }, (_, i) => `<i style="left:${((i + 1) / el.cada) * 100}%" class="${hechas >= (i + 1) * porBono ? "on" : i === el.cada - 1 ? "end" : ""}"></i>`).join("")}</div></div>
-      <div class="fm"><b>${hechas} de ${total} clases</b><span>${faltan ? `Te faltan ${faltan} · quedan ${dias} días` : "¡Ya puedes elegir!"}</span></div>
     </section>`;
 }
 
@@ -247,7 +260,7 @@ function pintar() {
     </section>
     ${botonRenovar(d, e.quedan)}
     ${d.agenda ? fila("cal", "📅", "Huecos libres esta semana", "Toca para ver y pedir hora") + (abierto.cal ? calendario(d.agenda) : "") : ""}
-    ${el ? fila("regalo", "🎁", `Con ${el.cada} bonos, eliges regalo`, "Mira los productos y lo que llevas") + (abierto.regalo ? tarjetaElegir(el, actual, e) : "") : ""}
+    ${el ? fila("regalo", "🎁", `Cada ${el.cada} clases, eliges regalo`, resumenRegalo(el)) + (abierto.regalo ? tarjetaElegir(el) : "") : ""}
     ${enApp ? "" : `<button type="button" class="guarda" data-abre="guardar">📲 <u>Guárdalo en tu móvil</u> para tenerlo a un toque</button>${abierto.guardar ? tarjetaAMano() : ""}`}
     <p class="pie">Actualizado ${larga(d.actualizado)}, ${hora(d.actualizado)}</p>`;
 }
