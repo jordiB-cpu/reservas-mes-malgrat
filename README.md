@@ -47,7 +47,8 @@ las cuentas con rol `admin` (Mily y Jordi), con la misma cuenta que la tienda.
   coincide uno solo, se rellena su teléfono. Si no está, basta el nombre (el
   teléfono es opcional) y, con teléfono, se puede guardar también en Jugadores.
   Se guarda en `court_bookings.players`; las pistas reservadas a la vez
-  comparten la lista (`group_id`). Ver `supabase/jugadores-reserva.sql`.
+  comparten la lista (`group_id`, uno por día; siguen unidas aunque luego se
+  cambie la hora de una). Ver `supabase/jugadores-reserva.sql`.
   **Sin ese SQL aplicado la app sigue funcionando**: guarda la reserva sin
   jugadores y lo avisa.
 - **WhatsApp a cada jugador**: al guardar una reserva con jugadores, la hoja

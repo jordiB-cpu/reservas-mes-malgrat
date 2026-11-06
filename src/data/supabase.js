@@ -79,10 +79,11 @@ export function createSupabaseBackend(url, key) {
       if (group_id !== undefined) patch.group_id = group_id;
       unwrap(await sb.from("court_bookings").update(patch).in("id", ids));
     },
-    // Las pistas de la misma reserva (mismo grupo y misma hora), esta incluida.
+    // Las pistas de la misma reserva (mismo grupo, sin las canceladas), esta
+    // incluida. Solo por grupo: si se cambia la hora de una, siguen unidas.
     async groupOf(b) {
       if (!withPlayers || !b.group_id) return [{ id: b.id, court_id: b.court_id }];
-      return unwrap(await sb.from("court_bookings").select("id, court_id").eq("group_id", b.group_id).eq("starts_at", b.starts_at).is("cancelled_at", null));
+      return unwrap(await sb.from("court_bookings").select("id, court_id").eq("group_id", b.group_id).is("cancelled_at", null));
     },
     async updateBooking(id, patch) {
       unwrap(await sb.from("court_bookings").update(patch).eq("id", id));

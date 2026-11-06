@@ -518,19 +518,23 @@ export function openSheet(app, { booking, court, day, min }, onDone) {
     const res = await api.bookMany(items);
     if (!res.ok) return showConflicts(res.conflicts, { courts: courts.length, days: days.length });
     // Después, quién juega y el grupo que une las pistas (jugadores-reserva.sql).
-    // Si falla, la reserva ya está hecha: se avisa y ya.
-    const group_id = courts.length > 1 ? crypto.randomUUID() : null;
+    // Un grupo por día: las pistas de ese día comparten jugadores, y cada semana
+    // de una reserva repetida va aparte. Si falla, la reserva ya está hecha: se avisa y ya.
+    const many = courts.length > 1;
     const players = await withAgenda(st.players);
+    // res.ids va en el mismo orden que items (día × pista).
+    const batches = many
+      ? days.map((d, i) => ({ ids: res.ids.slice(i * courts.length, (i + 1) * courts.length), group_id: crypto.randomUUID() }))
+      : [{ ids: res.ids, group_id: null }];
     let warn = "";
     if (!hasPl) warn = players.length ? NOT_SAVED : "";
-    else if (players.length || group_id) {
+    else if (players.length || many) {
       try {
-        await api.saveBookingPlayers(res.ids, { players, group_id });
+        await Promise.all(batches.map((b) => api.saveBookingPlayers(b.ids, { players, group_id: b.group_id })));
       } catch (err) {
         if (players.length) warn = `Reserva guardada, pero los jugadores no: ${err.message}`;
       }
     }
-    const many = courts.length > 1;
     const msg = items.length === 1 ? "Reserva guardada" : many && days.length === 1 ? `${courts.length} pistas reservadas` : `${items.length} reservas guardadas`;
     if (players.some((p) => waNumber(p.phone))) return showSend({ v, ctx: msgCtx(), players, warn, msg, weeks: days.length });
     dismiss();

@@ -124,12 +124,20 @@ viejas.c === antes.c && viejas.vacias === viejas.c ? ok(`las ${viejas.c} reserva
 const entreno = [1, 2].map((c) => item(c, 24, "17:30", "19:00", { name: "José Calero", phone: "600111222" }));
 const r9 = await one(`select * from court_book_many($1)`, [JSON.stringify(entreno)]);
 r9.ok && r9.ids.length === 2 ? ok("Pistas 1 y 2 de golpe (24/10 17:30): court_book_many sigue igual") : bad(JSON.stringify(r9));
+// La app reparte los ids por día y pista según el orden de la lista: tiene que coincidir.
+const orden = await db.query(`select id, court_id from court_bookings where id = any($1)`, [r9.ids]);
+r9.ids.every((x, i) => orden.rows.find((r) => r.id === x)?.court_id === entreno[i].court_id) ? ok("court_book_many devuelve los ids en el mismo orden que la lista") : bad(JSON.stringify(orden.rows));
 const jug = (n) => Array.from({ length: n }, (_, i) => ({ name: `Jugador ${i + 1}`, phone: i % 2 ? null : `61100000${i}`, player_id: null }));
 const G = "33333333-3333-3333-3333-333333333333";
 const set8 = await affected(`update court_bookings set players = $1, group_id = $2 where id = any($3)`, [JSON.stringify(jug(8)), G, r9.ids]);
 set8 === 2 ? ok("admin guarda 8 jugadores (4 por pista) en las 2 pistas del grupo") : bad("guardadas " + set8);
-const grupo = await one(`select count(*)::int c, min(jsonb_array_length(players))::int n from court_bookings where group_id = $1 and starts_at = $2 and cancelled_at is null`, [G, at(24, "17:30")]);
+// Misma consulta que groupOf() de la app: solo por grupo, sin las canceladas.
+const hermanas = `select count(*)::int c, min(jsonb_array_length(players))::int n from court_bookings where group_id = $1 and cancelled_at is null`;
+const grupo = await one(hermanas, [G]);
 grupo.c === 2 && grupo.n === 8 ? ok("al abrir una, se encuentra la otra pista de la misma reserva (grupo) con sus 8 jugadores") : bad(JSON.stringify(grupo));
+await db.query(`update court_bookings set starts_at = $1, ends_at = $2 where id = $3`, [at(24, "18:00"), at(24, "19:30"), r9.ids[1]]);
+const movida = await one(hermanas, [G]);
+movida.c === 2 ? ok("si se cambia la hora de una de las 2 pistas, siguen unidas y comparten la lista") : bad(JSON.stringify(movida));
 const doce = await affected(`update court_bookings set players = $1 where id = $2`, [JSON.stringify(jug(12)), r9.ids[0]]);
 doce === 1 ? ok("12 jugadores (3 pistas) se pueden guardar") : bad("12 -> " + doce);
 await expectFail("13 jugadores: no (como mucho 12)", `update court_bookings set players = $1 where id = $2`, [JSON.stringify(jug(13)), r9.ids[0]]);

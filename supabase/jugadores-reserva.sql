@@ -6,8 +6,9 @@
 -- Qué hace: añade dos columnas a las reservas (court_bookings):
 --   · players: la lista de quién juega, [{ "name", "phone", "player_id" }],
 --     hasta 4 por pista (la app lo controla; aquí, como mucho 12 = 3 pistas).
---   · group_id: une las reservas de varias pistas hechas a la vez (p. ej.
---     Pista 1 y Pista 2 para un entreno), para que compartan la lista.
+--   · group_id: une las pistas de una misma reserva de un día (p. ej.
+--     Pista 1 y Pista 2 para un entreno), para que compartan la lista. Cada
+--     semana de una reserva repetida lleva su propio grupo.
 -- No borra ni cambia nada de lo que ya hay: las reservas antiguas quedan con
 -- la lista vacía y court_book_many sigue igual.
 --

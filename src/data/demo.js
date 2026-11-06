@@ -132,7 +132,7 @@ export function createDemoBackend() {
     },
     async groupOf(b) {
       if (noPlayersSql() || !b.group_id) return [{ id: b.id, court_id: b.court_id }];
-      return wait(load().bookings.filter((x) => x.group_id === b.group_id && x.starts_at === b.starts_at && !x.cancelled_at).map((x) => ({ id: x.id, court_id: x.court_id })));
+      return wait(load().bookings.filter((x) => x.group_id === b.group_id && !x.cancelled_at).map((x) => ({ id: x.id, court_id: x.court_id })));
     },
     async updateBooking(id, patch) {
       const s = load();
