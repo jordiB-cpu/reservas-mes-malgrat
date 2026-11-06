@@ -75,6 +75,23 @@ await db.query(`select * from court_book_many($1)`, [JSON.stringify([item(3, 27,
 const r4 = await one(`select * from court_book_many($1)`, [JSON.stringify(weekly)]);
 const cnt = await one(`select count(*)::int c from court_bookings where series_id = '${series}'`);
 !r4.ok && cnt.c === 0 ? ok("serie con un choque el 27: no se crea ninguna (todo o nada)") : bad(JSON.stringify(r4) + " creadas " + cnt.c);
+// "Reservar las 3 pistas" (p. ej. una americana): la misma reserva en las 3, todo o nada
+const amer = (d, h1, h2, extra = {}) => [1, 2, 3].map((c) => item(c, d, h1, h2, { kind: "americana", name: "Americana masculina 500", phone: null, ...extra }));
+const r6 = await one(`select * from court_book_many($1)`, [JSON.stringify(amer(22, "07:00", "08:30"))]);
+const c6 = await one(`select count(distinct court_id)::int c from court_bookings where name = 'Americana masculina 500' and starts_at = '${at(22, "07:00")}'`);
+r6.ok && r6.ids.length === 3 && c6.c === 3 ? ok("3 pistas de golpe (22/10 7:00-8:30): se crean las 3") : bad(JSON.stringify(r6) + " pistas " + c6.c);
+await db.query(`select * from court_book_many($1)`, [JSON.stringify([item(2, 29, "07:30", "08:30")])]);
+const r7 = await one(`select * from court_book_many($1)`, [JSON.stringify(amer(29, "07:00", "08:30"))]);
+const c7 = await one(`select count(*)::int c from court_bookings where name = 'Americana masculina 500' and starts_at = '${at(29, "07:00")}'`);
+!r7.ok && r7.conflicts.length === 1 && r7.conflicts[0].court_id === 2 && r7.conflicts[0].with.name === "Juan" && c7.c === 0
+  ? ok("3 pistas con la Pista 2 ocupada: no se crea ninguna y dice qué pista choca y con qué")
+  : bad(JSON.stringify(r7) + " creadas " + c7.c);
+// 3 pistas + repetir cada semana: 2 semanas × 3 pistas, una serie por pista
+const per = { 1: "22222222-2222-2222-2222-222222222221", 2: "22222222-2222-2222-2222-222222222222", 3: "22222222-2222-2222-2222-222222222223" };
+const both = ["23", "30"].flatMap((d) => [1, 2, 3].map((c) => item(c, d, "20:00", "21:30", { kind: "americana", name: "Americana semanal", series_id: per[c] })));
+const r8 = await one(`select * from court_book_many($1)`, [JSON.stringify(both)]);
+const c8 = await one(`select count(*)::int n, count(distinct series_id)::int s from court_bookings where name = 'Americana semanal'`);
+r8.ok && c8.n === 6 && c8.s === 3 ? ok("3 pistas cada semana (2 semanas): 6 reservas, una serie por pista") : bad(JSON.stringify(r8) + " " + JSON.stringify(c8));
 // Cancelar libera el hueco
 const first = await one(`select id from court_bookings where court_id = 1 and starts_at = '${at(20, "10:00")}'`);
 await db.query(`update court_bookings set cancelled_at = now() where id = $1`, [first.id]);

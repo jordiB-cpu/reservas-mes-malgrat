@@ -34,5 +34,9 @@ las cuentas con rol `admin` (Mily y Jordi), con la misma cuenta que la tienda.
   (`court_bookings_no_overlap`), aunque se guarden a la vez.
 - "Repetir cada semana" crea todas las fechas de golpe con `court_book_many`:
   si alguna choca, no se crea ninguna y la app enseña los choques.
+- "Reservar las 3 pistas" (al crear una reserva, p. ej. una americana) crea la
+  misma reserva en todas las pistas activas, también con "Repetir cada semana"
+  (una serie por pista). Va por `court_book_many`: todo o nada. Las pistas
+  desactivadas en Ajustes no se reservan y la ficha lo avisa.
 - Cancelar no borra: marca `cancelled_at` (por eso se puede deshacer).
 - Para dar acceso a monitores más adelante: cambiar `court_staff()` en el esquema.

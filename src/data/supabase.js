@@ -43,13 +43,15 @@ export function createSupabaseBackend(url, key) {
     },
 
     async loadConfig() {
-      const [courts, settings, staff] = await Promise.all([
-        sb.from("courts").select("*").eq("active", true).order("sort").then(unwrap),
+      const [all, settings, staff] = await Promise.all([
+        sb.from("courts").select("*").order("sort").then(unwrap),
         sb.from("court_settings").select("key, value, label").then(unwrap),
         // Quién puede reservar (para saber quién hizo cada reserva).
         sb.from("profiles").select("id, full_name, email").eq("role", "admin").then(unwrap),
       ]);
-      return { courts, settings: Object.fromEntries(settings.map((s) => [s.key, s.value])), staff };
+      // La agenda solo enseña las pistas activas; las desactivadas (Ajustes) se
+      // guardan aparte para avisar al "Reservar las 3 pistas".
+      return { courts: all.filter((c) => c.active), offCourts: all.filter((c) => !c.active), settings: Object.fromEntries(settings.map((s) => [s.key, s.value])), staff };
     },
     async bookings(fromIso, toIso) {
       return unwrap(await sb.from("court_bookings").select(COLS).is("cancelled_at", null).lt("starts_at", toIso).gt("ends_at", fromIso).order("starts_at"));

@@ -214,6 +214,9 @@ ul { padding: 0; list-style: none; }
 .seg span { display: grid; place-items: center; min-height: 42px; border-radius: var(--pill); font-weight: 700; font-size: 15px; cursor: pointer; transition: background-color 0.25s var(--ease), color 0.25s var(--ease); }
 .seg input:checked + span { background: var(--night); color: var(--chalk); }
 .seg input:focus-visible + span { outline: 2.5px solid var(--green); outline-offset: 2px; }
+/* "Reservar las 3 pistas": todas quedan marcadas y no se puede elegir una. */
+.seg.all span { background: var(--night); color: var(--chalk); cursor: default; }
+.warn { color: var(--alert); font-weight: 600; }
 
 .kind { position: relative; cursor: pointer; padding-left: 12px; }
 .kind input { position: absolute; opacity: 0; pointer-events: none; }

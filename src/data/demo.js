@@ -62,8 +62,10 @@ export function createDemoBackend() {
 
     async loadConfig() {
       const s = config();
+      const all = [...s.courts].sort((a, b) => a.sort - b.sort);
       return wait({
-        courts: s.courts.filter((c) => c.active).sort((a, b) => a.sort - b.sort),
+        courts: all.filter((c) => c.active),
+        offCourts: all.filter((c) => !c.active),
         settings: s.settings,
         staff: [{ id: "demo", full_name: "Mily (demo)", email: "mily@demo" }, { id: "demo-jordi", full_name: "Jordi (demo)", email: "jordi@demo" }],
       });
