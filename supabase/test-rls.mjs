@@ -106,5 +106,53 @@ pl.c === 1 ? ok("buscar jugador por nombre") : bad("jugadores " + pl.c);
 await db.query(`update court_settings set value = '"08:00"' where key = 'open'`);
 ok("admin cambia el horario");
 
+// ---- Quién juega en cada reserva (jugadores-reserva.sql) ----
+const jsql = fs.readFileSync(new URL("jugadores-reserva.sql", import.meta.url), "utf8");
+const sinSql = await rows("select players, group_id from court_bookings limit 1");
+String(sinSql).startsWith("denied") ? ok("sin jugadores-reserva.sql la columna no existe: la app lo detecta y guarda sin jugadores (" + sinSql + ")") : bad("players ya existía");
+const antes = await one("select count(*)::int c from court_bookings");
+await db.exec("reset role;");
+await db.exec(jsql);
+await db.exec(jsql); // re-ejecutable
+ok("jugadores-reserva.sql carga dos veces");
+await db.exec(sql);
+ok("schema.sql otra vez después: no choca con las columnas nuevas");
+await as("authenticated", ADMIN);
+const viejas = await one("select count(*)::int c, count(*) filter (where players = '[]'::jsonb)::int vacias from court_bookings");
+viejas.c === antes.c && viejas.vacias === viejas.c ? ok(`las ${viejas.c} reservas que ya había siguen ahí, con la lista vacía`) : bad(JSON.stringify(viejas));
+// Pistas 1 y 2 a la vez (p. ej. un entreno de equipo): court_book_many no cambia
+const entreno = [1, 2].map((c) => item(c, 24, "17:30", "19:00", { name: "José Calero", phone: "600111222" }));
+const r9 = await one(`select * from court_book_many($1)`, [JSON.stringify(entreno)]);
+r9.ok && r9.ids.length === 2 ? ok("Pistas 1 y 2 de golpe (24/10 17:30): court_book_many sigue igual") : bad(JSON.stringify(r9));
+const jug = (n) => Array.from({ length: n }, (_, i) => ({ name: `Jugador ${i + 1}`, phone: i % 2 ? null : `61100000${i}`, player_id: null }));
+const G = "33333333-3333-3333-3333-333333333333";
+const set8 = await affected(`update court_bookings set players = $1, group_id = $2 where id = any($3)`, [JSON.stringify(jug(8)), G, r9.ids]);
+set8 === 2 ? ok("admin guarda 8 jugadores (4 por pista) en las 2 pistas del grupo") : bad("guardadas " + set8);
+const grupo = await one(`select count(*)::int c, min(jsonb_array_length(players))::int n from court_bookings where group_id = $1 and starts_at = $2 and cancelled_at is null`, [G, at(24, "17:30")]);
+grupo.c === 2 && grupo.n === 8 ? ok("al abrir una, se encuentra la otra pista de la misma reserva (grupo) con sus 8 jugadores") : bad(JSON.stringify(grupo));
+const doce = await affected(`update court_bookings set players = $1 where id = $2`, [JSON.stringify(jug(12)), r9.ids[0]]);
+doce === 1 ? ok("12 jugadores (3 pistas) se pueden guardar") : bad("12 -> " + doce);
+await expectFail("13 jugadores: no (como mucho 12)", `update court_bookings set players = $1 where id = $2`, [JSON.stringify(jug(13)), r9.ids[0]]);
+await expectFail("la lista tiene que ser una lista", `update court_bookings set players = '{"name":"Diego"}' where id = $1`, [r9.ids[0]]);
+await expectFail("la lista no puede ser null", `update court_bookings set players = null where id = $1`, [r9.ids[0]]);
+await db.query(`update court_bookings set players = $1 where id = $2`, [JSON.stringify(jug(8)), r9.ids[0]]);
+await db.exec("reset role;");
+await db.exec(jsql);
+await as("authenticated", ADMIN);
+const sigue = await one(`select jsonb_array_length(players)::int n from court_bookings where id = $1`, [r9.ids[0]]);
+sigue.n === 8 ? ok("volver a pegar jugadores-reserva.sql no borra las listas") : bad("quedan " + sigue.n);
+// Cliente de la tienda y visitante: ni ven ni tocan las listas
+await as("authenticated", CUST);
+const cv = await rows("select players from court_bookings");
+cv === 0 ? ok("cliente de la tienda no ve quién juega") : bad("cliente ve " + cv);
+const cu = await affected(`update court_bookings set players = '[]'::jsonb where id = $1`, [r9.ids[0]]);
+blocked(cu) ? ok("cliente no cambia la lista (" + cu + ")") : bad("cliente cambió la lista");
+await as("anon");
+const av = await rows("select players from court_bookings");
+blocked(av) ? ok("visitante no ve quién juega (" + av + ")") : bad("visitante ve " + av);
+await as("authenticated", ADMIN);
+const intacta = await one(`select jsonb_array_length(players)::int n from court_bookings where id = $1`, [r9.ids[0]]);
+intacta.n === 8 ? ok("la lista sigue intacta tras los intentos de fuera") : bad("quedan " + intacta.n);
+
 console.log(failed ? `\n${failed} FALLO(S)` : "\nTodo OK");
 process.exit(failed ? 1 : 0);

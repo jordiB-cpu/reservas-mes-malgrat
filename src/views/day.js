@@ -1,5 +1,5 @@
 import { api } from "../data/index.js";
-import { KINDS, $, esc, icon, reduced, staffInfo, staffLegend, toast } from "../ui.js";
+import { KINDS, $, esc, icon, othersCount, playersOf, reduced, staffInfo, staffLegend, toast } from "../ui.js";
 import { addDays, at, dayShort, dayTitle, hhmm, local, toMin, today } from "../time.js";
 import { openSheet } from "./sheet.js";
 
@@ -85,12 +85,16 @@ export async function renderDay(view, app, key) {
           const k = KINDS[b.kind] ?? KINDS.partido;
           const short = to - from <= slot;
           const by = staffInfo(app, b.created_by);
+          // "+3": cuántos juegan además del titular (jugadores de la reserva).
+          const more = othersCount(b);
+          const total = playersOf(b).length;
           return `<button type="button" class="bk${short ? " short" : ""}${b.paid ? " paid" : ""}" data-id="${b.id}"
             style="--k:${k.color}; --u:${by?.color ?? k.color}; --top:${(from - open) / slot}; --len:${(to - from) / slot}"
-            aria-label="${esc(`${k.label}${b.name ? `, ${b.name}` : ""}, de ${hhmm(a.min)} a ${hhmm(z.min)}${b.paid ? ", pagado" : ""}${by ? `, reservada por ${by.name}` : ""}`)}">
+            aria-label="${esc(`${k.label}${b.name ? `, ${b.name}` : ""}, de ${hhmm(a.min)} a ${hhmm(z.min)}${total ? `, ${total} ${total === 1 ? "jugador" : "jugadores"}` : ""}${b.paid ? ", pagado" : ""}${by ? `, reservada por ${by.name}` : ""}`)}">
             ${by ? `<span class="by" title="Reservada por ${esc(by.name)}">${esc(by.initial)}</span>` : ""}
             <span class="bk-time">${hhmm(a.min)}–${hhmm(z.min)}</span>
             <span class="bk-name">${esc(b.name || k.label)}</span>
+            ${more ? `<span class="bk-pl" title="${esc(`Juegan ${total}: ${playersOf(b).map((p) => p.name).join(", ")}`)}">+${more}</span>` : ""}
             ${short ? "" : `<span class="bk-meta">${k.label}${b.series_id ? ` ${icon("repeat")}` : ""}${b.paid ? ` ${icon("check")}` : ""}</span>`}
           </button>`;
         })

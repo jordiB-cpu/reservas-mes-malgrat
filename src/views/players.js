@@ -1,5 +1,5 @@
 import { api } from "../data/index.js";
-import { KINDS, $, busy, esc, icon, toast, waLink } from "../ui.js";
+import { KINDS, $, busy, esc, icon, initials, toast, waLink } from "../ui.js";
 import { dayShort, hhmm, local, today } from "../time.js";
 
 const norm = (s) => String(s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -53,8 +53,6 @@ export async function renderPlayers(view, app, id) {
     if (p) openPlayer(app, p, load);
   }
 }
-
-const initials = (n) => n.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
 /* Ficha de jugador (misma hoja que las reservas). */
 async function openPlayer(app, player, onDone) {

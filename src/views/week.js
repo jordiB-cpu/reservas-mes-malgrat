@@ -1,5 +1,5 @@
 import { api } from "../data/index.js";
-import { KINDS, $, esc, icon, staffInfo, staffLegend, toast } from "../ui.js";
+import { KINDS, $, esc, icon, othersCount, staffInfo, staffLegend, toast } from "../ui.js";
 import { addDays, at, dayShort, hhmm, local, parseDay, toMin, today } from "../time.js";
 import { openSheet } from "./sheet.js";
 
@@ -69,7 +69,7 @@ export async function renderWeek(view, app, key) {
             const from = Math.max(a, open), to = Math.min(z, close);
             const k = KINDS[b.kind] ?? KINDS.partido;
             return `<button type="button" class="wbk" data-id="${b.id}" style="--k:${k.color}; --u:${staffInfo(app, b.created_by)?.color ?? k.color}; --top:${(from - open) / slot}; --len:${(to - from) / slot}"
-              title="${esc(`${courtName(c.id)}, ${hhmm(a)}–${hhmm(z)}: ${b.name || k.label}`)}" aria-label="${esc(`${dayShort(d)}, ${courtName(c.id)}, ${hhmm(a)} a ${hhmm(z)}, ${b.name || k.label}`)}"><span>${esc(b.name || k.label)}</span></button>`;
+              title="${esc(`${courtName(c.id)}, ${hhmm(a)}–${hhmm(z)}: ${b.name || k.label}${othersCount(b) ? ` +${othersCount(b)}` : ""}`)}" aria-label="${esc(`${dayShort(d)}, ${courtName(c.id)}, ${hhmm(a)} a ${hhmm(z)}, ${b.name || k.label}`)}"><span>${esc(b.name || k.label)}</span></button>`;
           })
           .join("");
       });
@@ -87,7 +87,7 @@ export async function renderWeek(view, app, key) {
           const k = KINDS[b.kind] ?? KINDS.partido;
           return `<li><button type="button" class="arow" data-id="${b.id}" style="--k:${k.color}">
             <span class="arow-time">${hhmm(local(b.starts_at).min)}–${hhmm(local(b.ends_at).min)}</span>
-            <span class="arow-name">${esc(b.name || k.label)}</span>
+            <span class="arow-name">${esc(b.name || k.label)}${othersCount(b) ? ` <small class="arow-pl">+${othersCount(b)}</small>` : ""}</span>
             <span class="arow-court">${esc(courtName(b.court_id))}</span></button></li>`;
         }).join("")}</ul>` : ""}
       </article>`;

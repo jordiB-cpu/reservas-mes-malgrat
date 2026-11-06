@@ -5,17 +5,24 @@
 import { addDays, at, today } from "../time.js";
 
 const KEY = "reservas-demo-v1";
+// Para probar la app como si faltara supabase/jugadores-reserva.sql:
+// localStorage.setItem("reservas-demo-sin-jugadores", "1") y recargar.
+const noPlayersSql = () => {
+  try { return localStorage.getItem("reservas-demo-sin-jugadores") === "1"; } catch { return false; }
+};
+const MISSING = "Los jugadores aún no se pueden guardar: falta activarlos en la base de datos (lo hace Jordi).";
 const overlap = (a, b) => a.court_id === b.court_id && new Date(a.starts_at) < new Date(b.ends_at) && new Date(b.starts_at) < new Date(a.ends_at);
 
 function seed() {
   const t = today();
   const b = (day, court, h, dur, kind, name, phone, extra = {}) => ({
     id: crypto.randomUUID(), court_id: court, starts_at: at(day, h * 60), ends_at: at(day, h * 60 + dur), kind, name, phone: phone ?? null,
-    notes: null, paid: false, series_id: null, player_id: null, cancelled_at: null, ...extra,
+    notes: null, paid: false, series_id: null, player_id: null, cancelled_at: null, players: [], group_id: null, ...extra,
   });
   const serie = crypto.randomUUID();
+  const juega = (name, phone) => ({ name, phone, player_id: null });
   const bookings = [
-    b(t, 1, 9, 90, "partido", "Juan Pérez", "600111222", { paid: true }),
+    b(t, 1, 9, 90, "partido", "Juan Pérez", "600111222", { paid: true, players: [juega("Juan Pérez", "600111222"), juega("Marta Soler", "622333444"), juega("Pau Roca", "633444555"), juega("Toni Serra", null)] }),
     b(t, 2, 10, 60, "clase", "Clase de Laura (iniciación)", "611222333"),
     b(t, 1, 17, 60, "escuela", "Escuela infantil", null, { series_id: serie }),
     b(t, 2, 17, 60, "escuela", "Escuela infantil", null, { series_id: serie }),
@@ -31,6 +38,7 @@ function seed() {
     { id: crypto.randomUUID(), name: "Juan Pérez", phone: "600111222" },
     { id: crypto.randomUUID(), name: "Marta Soler", phone: "622333444" },
     { id: crypto.randomUUID(), name: "Laura Gil", phone: "611222333" },
+    { id: crypto.randomUUID(), name: "Pau Roca", phone: "633444555" },
   ];
   return { bookings, players };
 }
@@ -68,6 +76,7 @@ export function createDemoBackend() {
         offCourts: all.filter((c) => !c.active),
         settings: s.settings,
         staff: [{ id: "demo", full_name: "Mily (demo)", email: "mily@demo" }, { id: "demo-jordi", full_name: "Jordi (demo)", email: "jordi@demo" }],
+        hasPlayers: !noPlayersSql(),
       });
     },
     async allCourts() {
@@ -89,7 +98,9 @@ export function createDemoBackend() {
     },
     async bookings(fromIso, toIso) {
       const s = load();
-      return wait(s.bookings.filter((b) => !b.cancelled_at && b.starts_at < toIso && b.ends_at > fromIso).sort((a, b) => a.starts_at.localeCompare(b.starts_at)));
+      // Sin el SQL de jugadores, las reservas llegan sin esas columnas (como en Supabase).
+      const strip = noPlayersSql() ? ({ players, group_id, ...b }) => b : (b) => b;
+      return wait(s.bookings.filter((b) => !b.cancelled_at && b.starts_at < toIso && b.ends_at > fromIso).sort((a, b) => a.starts_at.localeCompare(b.starts_at)).map(strip));
     },
     async bookMany(items) {
       const s = load();
@@ -107,6 +118,21 @@ export function createDemoBackend() {
       });
       save(s);
       return wait({ ok: true, ids, conflicts: [] });
+    },
+    async saveBookingPlayers(ids, { players, group_id }) {
+      if (noPlayersSql()) throw new Error(MISSING);
+      const s = load();
+      s.bookings.forEach((b) => {
+        if (!ids.includes(b.id)) return;
+        b.players = players;
+        if (group_id !== undefined) b.group_id = group_id;
+      });
+      save(s);
+      return wait();
+    },
+    async groupOf(b) {
+      if (noPlayersSql() || !b.group_id) return [{ id: b.id, court_id: b.court_id }];
+      return wait(load().bookings.filter((x) => x.group_id === b.group_id && x.starts_at === b.starts_at && !x.cancelled_at).map((x) => ({ id: x.id, court_id: x.court_id })));
     },
     async updateBooking(id, patch) {
       const s = load();

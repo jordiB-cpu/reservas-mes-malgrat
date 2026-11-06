@@ -3,8 +3,14 @@
 import { createClient } from "@supabase/supabase-js";
 
 const COLS = "id, court_id, starts_at, ends_at, kind, player_id, name, phone, notes, paid, series_id, created_by, created_at";
+// Quién juega (supabase/jugadores-reserva.sql). Si Jordi aún no lo ha
+// aplicado, esas columnas no existen: la app sigue igual, sin jugadores.
+const PLAYER_COLS = "players, group_id";
+const missingPlayers = (msg) => /(\.|')(players|group_id)\b/.test(msg) && /does not exist|schema cache/i.test(msg);
 
 function friendly(msg) {
+  if (missingPlayers(msg)) return "Los jugadores aún no se pueden guardar: falta activarlos en la base de datos (lo hace Jordi).";
+  if (/court_bookings_players_list/.test(msg)) return "Demasiados jugadores en la reserva.";
   if (/court_bookings_no_overlap|exclusion/i.test(msg)) return "Ese hueco ya está ocupado en esa pista.";
   if (/court_players_phone_key/.test(msg)) return "Ya hay un jugador con ese teléfono.";
   if (/Invalid login credentials/i.test(msg)) return "Email o contraseña incorrectos.";
@@ -19,6 +25,8 @@ export function createSupabaseBackend(url, key) {
     if (error) throw new Error(friendly(error.message));
     return data;
   };
+  let withPlayers = true; // se comprueba en loadConfig
+  const cols = () => (withPlayers ? `${COLS}, ${PLAYER_COLS}` : COLS);
 
   return {
     mode: "supabase",
@@ -43,22 +51,38 @@ export function createSupabaseBackend(url, key) {
     },
 
     async loadConfig() {
-      const [all, settings, staff] = await Promise.all([
+      const [all, settings, staff, probe] = await Promise.all([
         sb.from("courts").select("*").order("sort").then(unwrap),
         sb.from("court_settings").select("key, value, label").then(unwrap),
         // Quién puede reservar (para saber quién hizo cada reserva).
         sb.from("profiles").select("id, full_name, email").eq("role", "admin").then(unwrap),
+        // ¿Está aplicado jugadores-reserva.sql? Si no, la columna no existe.
+        sb.from("court_bookings").select(PLAYER_COLS).limit(1),
       ]);
+      withPlayers = !(probe.error && missingPlayers(probe.error.message));
       // La agenda solo enseña las pistas activas; las desactivadas (Ajustes) se
-      // guardan aparte para avisar al "Reservar las 3 pistas".
-      return { courts: all.filter((c) => c.active), offCourts: all.filter((c) => !c.active), settings: Object.fromEntries(settings.map((s) => [s.key, s.value])), staff };
+      // guardan aparte para avisar al elegir pistas.
+      return { courts: all.filter((c) => c.active), offCourts: all.filter((c) => !c.active), settings: Object.fromEntries(settings.map((s) => [s.key, s.value])), staff, hasPlayers: withPlayers };
     },
     async bookings(fromIso, toIso) {
-      return unwrap(await sb.from("court_bookings").select(COLS).is("cancelled_at", null).lt("starts_at", toIso).gt("ends_at", fromIso).order("starts_at"));
+      return unwrap(await sb.from("court_bookings").select(cols()).is("cancelled_at", null).lt("starts_at", toIso).gt("ends_at", fromIso).order("starts_at"));
     },
     async bookMany(items) {
       const [r] = unwrap(await sb.rpc("court_book_many", { p_items: items }));
       return { ok: r.ok, ids: r.ids ?? [], conflicts: r.conflicts ?? [] };
+    },
+    // Quién juega: la misma lista en todas las pistas de la reserva (ids), y el
+    // grupo que une las pistas reservadas a la vez.
+    async saveBookingPlayers(ids, { players, group_id }) {
+      if (!withPlayers) throw new Error(friendly("column court_bookings.players does not exist"));
+      const patch = { players };
+      if (group_id !== undefined) patch.group_id = group_id;
+      unwrap(await sb.from("court_bookings").update(patch).in("id", ids));
+    },
+    // Las pistas de la misma reserva (mismo grupo y misma hora), esta incluida.
+    async groupOf(b) {
+      if (!withPlayers || !b.group_id) return [{ id: b.id, court_id: b.court_id }];
+      return unwrap(await sb.from("court_bookings").select("id, court_id").eq("group_id", b.group_id).eq("starts_at", b.starts_at).is("cancelled_at", null));
     },
     async updateBooking(id, patch) {
       unwrap(await sb.from("court_bookings").update(patch).eq("id", id));
@@ -98,7 +122,7 @@ export function createSupabaseBackend(url, key) {
     },
     // Reservas de un jugador: las enlazadas o, en las antiguas, por teléfono.
     async playerBookings(player) {
-      let q = sb.from("court_bookings").select(COLS).is("cancelled_at", null).order("starts_at", { ascending: false }).limit(200);
+      let q = sb.from("court_bookings").select(cols()).is("cancelled_at", null).order("starts_at", { ascending: false }).limit(200);
       q = player.phone ? q.or(`player_id.eq.${player.id},phone.eq.${player.phone}`) : q.eq("player_id", player.id);
       return unwrap(await q);
     },

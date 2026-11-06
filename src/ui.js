@@ -50,6 +50,23 @@ export const waLink = (phone, text) => {
   return n ? `https://wa.me/${n}?text=${encodeURIComponent(text)}` : null;
 };
 
+/* Jugadores de una reserva: [{ name, phone, player_id }]. */
+export const norm = (s) => String(s ?? "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ");
+export const initials = (n) => String(n ?? "").trim().split(/\s+/).slice(0, 2).map((w) => w[0] ?? "").join("").toUpperCase();
+/* ¿Es la misma persona? Por ficha, si no por teléfono, si no por nombre. */
+export function samePerson(a, b) {
+  if (!a || !b) return false;
+  if (a.player_id && b.player_id) return a.player_id === b.player_id;
+  const pa = waNumber(a.phone);
+  const pb = waNumber(b.phone);
+  if (pa && pb) return pa === pb;
+  return !!norm(a.name) && norm(a.name) === norm(b.name);
+}
+export const playersOf = (b) => (Array.isArray(b?.players) ? b.players : []);
+/* Cuántos juegan además del titular (lo que sale como "+3" en la parrilla). */
+export const othersCount = (b) =>
+  playersOf(b).filter((p) => !(b.name && samePerson(p, { name: b.name, phone: b.phone, player_id: b.player_id }))).length;
+
 export async function busy(btn, fn) {
   const label = btn?.innerHTML;
   if (btn) {
